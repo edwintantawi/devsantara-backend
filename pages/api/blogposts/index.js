@@ -1,5 +1,14 @@
 import admin from 'firebase-admin';
+import Cors from 'cors';
+import initMiddleware from '../middleware/init-middleware';
 import authMiddleware from '../middleware/authMiddleware';
+
+const cors = initMiddleware(
+  Cors({
+    origin: ['https://devsantara.vercel.app', 'http://localhost:3000'],
+    methods: ['GET', 'POST'],
+  })
+);
 
 const firebaseCredential = JSON.parse(
   process.env.NEXT_PUBLIC_FIREBASE_CREDENTIAL
@@ -11,7 +20,9 @@ if (!admin.apps.length) {
   });
 }
 
-const handler = (req, res) => {
+const handler = async (req, res) => {
+  await cors(req, res);
+
   const { method, body } = req;
 
   if (method === 'POST') {
