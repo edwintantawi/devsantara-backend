@@ -1,4 +1,4 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
 const firebaseCredential = JSON.parse(
   process.env.NEXT_PUBLIC_FIREBASE_CREDENTIAL
