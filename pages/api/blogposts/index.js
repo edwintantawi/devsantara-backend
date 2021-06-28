@@ -42,9 +42,15 @@ const handler = async (req, res) => {
           keywords: bodyJson.title.split(' '),
           postJson: bodyJson.postJson,
         };
-        admin.firestore().collection('blog_posts').add(blogPostData);
-
-        res.status(201).json({ message: 'Post success' });
+        admin
+          .firestore()
+          .collection('blog_posts')
+          .add(blogPostData)
+          .then(({ id }) => {
+            res
+              .status(201)
+              .json({ message: 'Post success', url: `/blogposts/${id}` });
+          });
       })
       .catch(() => res.status(401).json({ message: 'Unauthorized' }));
   }
