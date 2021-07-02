@@ -1,7 +1,8 @@
 import admin from 'firebase-admin';
 import Cors from 'cors';
-import initMiddleware from '../middleware/init-middleware';
-import authMiddleware from '../middleware/authMiddleware';
+import initMiddleware from '../../../middleware/init-middleware';
+import authMiddleware from '../../../middleware/authMiddleware';
+import handleQuerySnapshot from '../../../helpers/handleQuerySnapshot';
 
 const cors = initMiddleware(
   Cors({
@@ -33,13 +34,16 @@ const handler = async (req, res) => {
         const blogPostData = {
           authorPicture: user.picture,
           authorName: user.name,
-          authorEmail: user.uid,
+          authorUid: user.uid,
           timestamp: admin.firestore.FieldValue.serverTimestamp(),
           title: bodyJson.title,
           tags: bodyJson.tags
             .split(',')
             .map((tag, index) => ({ id: index, title: tag.trim() })),
           keywords: bodyJson.title.split(' '),
+          visitors: 0,
+          likes: 0,
+          bookmarks: 0,
           postJson: bodyJson.postJson,
         };
         admin
@@ -56,18 +60,62 @@ const handler = async (req, res) => {
   }
 
   if (method === 'GET') {
-    admin
-      .firestore()
-      .collection('blog_posts')
-      .orderBy('timestamp', 'desc')
-      .get()
-      .then((querySnapshot) => {
-        const results = [];
-        querySnapshot.forEach((result) =>
-          results.push({ id: result.id, data: result.data() })
-        );
-        res.status(200).json({ message: 'success', results });
-      });
+    const { uid, popular, latest } = req.query;
+
+    if (latest && uid) {
+      admin
+        .firestore()
+        .collection('blog_posts')
+        .where('authorUid', '==', uid)
+        .limit(3)
+        .orderBy('timestamp', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          handleQuerySnapshot(querySnapshot, res);
+        })
+        .catch(() => {
+          res.status(404).json({ message: 'Not found (latest)' });
+        });
+    } else if (popular && uid) {
+      admin
+        .firestore()
+        .collection('blog_posts')
+        .where('authorUid', '==', uid)
+        .limit(3)
+        .orderBy('visitors', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          handleQuerySnapshot(querySnapshot, res);
+        })
+        .catch(() => {
+          res.status(404).json({ message: 'Not found (popular)' });
+        });
+    } else if (uid) {
+      admin
+        .firestore()
+        .collection('blog_posts')
+        .where('authorUid', '==', uid)
+        .orderBy('timestamp', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          handleQuerySnapshot(querySnapshot, res);
+        })
+        .catch(() => {
+          res.status(404).json({ message: 'Not found (uid)' });
+        });
+    } else {
+      admin
+        .firestore()
+        .collection('blog_posts')
+        .orderBy('timestamp', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          handleQuerySnapshot(querySnapshot, res);
+        })
+        .catch(() => {
+          res.status(404).json({ message: 'Not found (no params)' });
+        });
+    }
   }
 };
 

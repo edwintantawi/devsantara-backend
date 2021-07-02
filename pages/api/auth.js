@@ -1,4 +1,4 @@
-import authMiddleware from './middleware/authMiddleware';
+import authMiddleware from '../../middleware/authMiddleware';
 
 const admin = require('firebase-admin');
 

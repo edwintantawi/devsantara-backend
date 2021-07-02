@@ -22,7 +22,7 @@ const handler = (req, res) => {
       if (doc.exists) {
         res
           .status(200)
-          .json({ message: 'Success', data: { id: doc.id, ...doc.data() } });
+          .json({ message: 'Success', result: { id: doc.id, ...doc.data() } });
       } else {
         res.status(404).json({ message: 'Not found' });
       }
