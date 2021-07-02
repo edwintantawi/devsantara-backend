@@ -42,8 +42,7 @@ const handler = async (req, res) => {
             .map((tag, index) => ({ id: index, title: tag.trim() })),
           keywords: bodyJson.title.split(' '),
           visitors: 0,
-          likes: 0,
-          bookmarks: 0,
+          likes: [],
           postJson: bodyJson.postJson,
         };
         admin
