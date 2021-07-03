@@ -1,16 +1,8 @@
-import admin from 'firebase-admin';
 import Cors from 'cors';
 import initMiddleware from '../../../middleware/init-middleware';
+import initFirebaseAdmin from '../../../helpers/init-firebase-admin';
 
-const firebaseCredential = JSON.parse(
-  process.env.NEXT_PUBLIC_FIREBASE_CREDENTIAL
-);
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(firebaseCredential),
-  });
-}
+const admin = initFirebaseAdmin();
 
 const cors = initMiddleware(
   Cors({

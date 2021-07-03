@@ -1,8 +1,10 @@
-import admin from 'firebase-admin';
 import Cors from 'cors';
 import initMiddleware from '../../../middleware/init-middleware';
 import authMiddleware from '../../../middleware/authMiddleware';
 import handleQuerySnapshot from '../../../helpers/handleQuerySnapshot';
+import initFirebaseAdmin from '../../../helpers/init-firebase-admin';
+
+const admin = initFirebaseAdmin();
 
 const cors = initMiddleware(
   Cors({
@@ -10,16 +12,6 @@ const cors = initMiddleware(
     methods: ['GET', 'POST'],
   })
 );
-
-const firebaseCredential = JSON.parse(
-  process.env.NEXT_PUBLIC_FIREBASE_CREDENTIAL
-);
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(firebaseCredential),
-  });
-}
 
 const handler = async (req, res) => {
   await cors(req, res);

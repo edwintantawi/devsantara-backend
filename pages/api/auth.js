@@ -1,17 +1,5 @@
 import authMiddleware from '../../middleware/authMiddleware';
 
-const admin = require('firebase-admin');
-
-const firebaseCredential = JSON.parse(
-  process.env.NEXT_PUBLIC_FIREBASE_CREDENTIAL
-);
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(firebaseCredential),
-  });
-}
-
 const handler = (req, res) => {
   authMiddleware(req)
     .then(() => {
