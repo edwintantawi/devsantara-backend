@@ -9,18 +9,16 @@ const admin = initFirebaseAdmin();
 const cors = initMiddleware(
   Cors({
     origin: ['https://devsantara.vercel.app', 'http://localhost:3000'],
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT'],
   })
 );
 
 const handler = async (req, res) => {
   await cors(req, res);
-
   const { method, body } = req;
+  const bodyJson = JSON.parse(body || '{}');
 
   if (method === 'POST') {
-    const bodyJson = JSON.parse(body);
-
     authMiddleware(req)
       .then((user) => {
         const blogPostData = {
@@ -45,6 +43,37 @@ const handler = async (req, res) => {
             res
               .status(201)
               .json({ message: 'Post success', url: `/blogposts/${id}` });
+          });
+      })
+      .catch(() => res.status(401).json({ message: 'Unauthorized' }));
+  }
+
+  if (method === 'PUT') {
+    authMiddleware(req)
+      .then(() => {
+        const blogPostData = {
+          ...bodyJson,
+          timestamp: new admin.firestore.Timestamp(
+            bodyJson.timestamp._seconds,
+            bodyJson.timestamp._nanoseconds
+          ),
+          lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
+          tags: bodyJson.tags
+            .split(',')
+            .map((tag, index) => ({ id: index, title: tag.trim() })),
+          keywords: bodyJson.title.split(' '),
+          postJson: bodyJson.postJson,
+        };
+        admin
+          .firestore()
+          .collection('blog_posts')
+          .doc(bodyJson.id)
+          .update(blogPostData)
+          .then(() => {
+            res.status(201).json({
+              message: 'Post success',
+              url: `/blogposts/${bodyJson.id}`,
+            });
           });
       })
       .catch(() => res.status(401).json({ message: 'Unauthorized' }));
