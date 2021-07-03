@@ -82,7 +82,7 @@ const handler = async (req, res) => {
   if (method === 'GET') {
     const { uid, popular, latest } = req.query;
 
-    if (latest && uid) {
+    if (!!latest === true && !!uid === true) {
       admin
         .firestore()
         .collection('blog_posts')
@@ -96,7 +96,7 @@ const handler = async (req, res) => {
         .catch(() => {
           res.status(404).json({ message: 'Not found (latest)' });
         });
-    } else if (popular && uid) {
+    } else if (!!popular === true && !!uid === true) {
       admin
         .firestore()
         .collection('blog_posts')
