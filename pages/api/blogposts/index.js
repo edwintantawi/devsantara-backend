@@ -48,41 +48,53 @@ const handler = async (req, res) => {
       .catch(() => res.status(401).json({ message: 'Unauthorized' }));
   }
 
-  if (method === 'PUT') {
-    authMiddleware(req)
-      .then(() => {
-        const blogPostData = {
-          ...bodyJson,
-          timestamp: new admin.firestore.Timestamp(
-            bodyJson.timestamp._seconds,
-            bodyJson.timestamp._nanoseconds
-          ),
-          lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
-          tags: bodyJson.tags
-            .split(',')
-            .map((tag, index) => ({ id: index, title: tag.trim() })),
-          keywords: bodyJson.title.split(' '),
-          postJson: bodyJson.postJson,
-        };
-        admin
-          .firestore()
-          .collection('blog_posts')
-          .doc(bodyJson.id)
-          .update(blogPostData)
-          .then(() => {
-            res.status(201).json({
-              message: 'Post success',
-              url: `/blogposts/${bodyJson.id}`,
-            });
-          });
-      })
-      .catch(() => res.status(401).json({ message: 'Unauthorized' }));
-  }
+  // if (method === 'PUT') {
+  //   authMiddleware(req)
+  //     .then(() => {
+  //       const blogPostData = {
+  //         ...bodyJson,
+  //         timestamp: new admin.firestore.Timestamp(
+  //           bodyJson.timestamp._seconds,
+  //           bodyJson.timestamp._nanoseconds
+  //         ),
+  //         lastUpdate: admin.firestore.FieldValue.serverTimestamp(),
+  //         tags: bodyJson.tags
+  //           .split(',')
+  //           .map((tag, index) => ({ id: index, title: tag.trim() })),
+  //         keywords: bodyJson.title.split(' '),
+  //         postJson: bodyJson.postJson,
+  //       };
+  //       admin
+  //         .firestore()
+  //         .collection('blog_posts')
+  //         .doc(bodyJson.id)
+  //         .update(blogPostData)
+  //         .then(() => {
+  //           res.status(201).json({
+  //             message: 'Post success',
+  //             url: `/blogposts/${bodyJson.id}`,
+  //           });
+  //         });
+  //     })
+  //     .catch(() => res.status(401).json({ message: 'Unauthorized' }));
+  // }
 
   if (method === 'GET') {
     const { uid, popular, latest } = req.query;
 
-    if (!!latest === true && !!uid === true) {
+    if (!latest && !uid && !latest) {
+      admin
+        .firestore()
+        .collection('blog_posts')
+        .orderBy('timestamp', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          handleQuerySnapshot(querySnapshot, res);
+        })
+        .catch(() => {
+          res.status(404).json({ message: 'Not found (no params)' });
+        });
+    } else if (!!latest && !!uid) {
       admin
         .firestore()
         .collection('blog_posts')
@@ -96,7 +108,7 @@ const handler = async (req, res) => {
         .catch(() => {
           res.status(404).json({ message: 'Not found (latest)' });
         });
-    } else if (!!popular === true && !!uid === true) {
+    } else if (!!popular && !!uid) {
       admin
         .firestore()
         .collection('blog_posts')
@@ -122,18 +134,6 @@ const handler = async (req, res) => {
         })
         .catch(() => {
           res.status(404).json({ message: 'Not found (uid)' });
-        });
-    } else {
-      admin
-        .firestore()
-        .collection('blog_posts')
-        .orderBy('timestamp', 'desc')
-        .get()
-        .then((querySnapshot) => {
-          handleQuerySnapshot(querySnapshot, res);
-        })
-        .catch(() => {
-          res.status(404).json({ message: 'Not found (no params)' });
         });
     }
   }
