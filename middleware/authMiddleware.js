@@ -1,12 +1,12 @@
 import admin from 'firebase-admin';
 
 const authMiddleware = (req) => {
-  const { idtoken } = req.headers;
+  const { token } = req.headers;
   return new Promise((resolve, reject) => {
-    if (idtoken) {
+    if (token) {
       admin
         .auth()
-        .verifyIdToken(idtoken)
+        .verifyIdToken(token)
         .then((user) => {
           resolve(user);
         })

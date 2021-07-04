@@ -7,7 +7,7 @@ const admin = initFirebaseAdmin();
 const cors = initMiddleware(
   Cors({
     origin: ['https://devsantara.vercel.app', 'http://localhost:3000'],
-    methods: ['GET', 'POST'],
+    methods: ['GET'],
   })
 );
 
@@ -17,7 +17,7 @@ const handler = async (req, res) => {
 
   admin
     .firestore()
-    .collection('blog_posts')
+    .collection('posts')
     .where('authorUid', '==', uid)
     .get()
     .then((querySnapshot) => {
