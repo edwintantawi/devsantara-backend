@@ -17,10 +17,12 @@ const handler = async (req, res) => {
   await cors(req, res);
   const { uid } = req.query;
 
+  const authorRef = admin.firestore().collection('users').doc(uid);
+
   admin
     .firestore()
     .collection('posts')
-    .where('authorUid', '==', uid)
+    .where('author', '==', authorRef)
     .orderBy('visitors', 'desc')
     .limit(3)
     .get()
@@ -28,7 +30,7 @@ const handler = async (req, res) => {
       handleQuerySnapshot(querySnapshot, res);
     })
     .catch(() => {
-      res.status(404).json({ message: 'posts not found' });
+      res.status(404).json({ message: 'popular posts not found' });
     });
 };
 

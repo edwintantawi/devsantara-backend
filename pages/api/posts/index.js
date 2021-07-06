@@ -18,10 +18,12 @@ const handler = async (req, res) => {
 
   // IF FROM QUERY HAVE UID, THEN RETURN ALL POST BY UID
   if (uid) {
+    const authorRef = admin.firestore().collection('users').doc(uid);
+
     admin
       .firestore()
       .collection('posts')
-      .where('authorUid', '==', uid)
+      .where('author', '==', authorRef)
       .orderBy('createAt', 'desc')
       .get()
       .then((querySnapshot) => {

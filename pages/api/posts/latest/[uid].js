@@ -17,10 +17,12 @@ const handler = async (req, res) => {
   await cors(req, res);
   const { uid } = req.query;
 
+  const authorRef = admin.firestore().collection('users').doc(uid);
+
   admin
     .firestore()
     .collection('posts')
-    .where('authorUid', '==', uid)
+    .where('author', '==', authorRef)
     .orderBy('createAt', 'desc')
     .limit(3)
     .get()

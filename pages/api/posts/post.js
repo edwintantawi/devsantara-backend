@@ -19,10 +19,11 @@ const handler = async (req, res) => {
 
   authMiddleware(req)
     .then((user) => {
+      const authorRef = admin.firestore().collection('users').doc(user.uid);
+
       const data = {
-        authorPicture: user.picture,
-        authorName: user.name,
-        authorUid: user.uid,
+        author: authorRef,
+        bannerImage: null,
         createAt: admin.firestore.FieldValue.serverTimestamp(),
         lastUpdateAt: null,
         title: bodyJson.title.trim(),

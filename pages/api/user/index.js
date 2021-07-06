@@ -1,6 +1,6 @@
 import Cors from 'cors';
-import initMiddleware from '../../middleware/init-middleware';
-import initFirebaseAdmin from '../../helpers/init-firebase-admin';
+import initMiddleware from '../../../middleware/init-middleware';
+import initFirebaseAdmin from '../../../helpers/init-firebase-admin';
 
 const admin = initFirebaseAdmin();
 
@@ -15,10 +15,12 @@ const handler = async (req, res) => {
   await cors(req, res);
   const { uid } = req.query;
 
+  const authorRef = admin.firestore().collection('users').doc(uid);
+
   admin
     .firestore()
     .collection('posts')
-    .where('authorUid', '==', uid)
+    .where('author', '==', authorRef)
     .get()
     .then((querySnapshot) => {
       const results = [];
