@@ -14,7 +14,7 @@ const cors = initMiddleware(
 
 const handler = async (req, res) => {
   await cors(req, res);
-  const { uid } = req.query;
+  const { uid, lastId } = req.query;
 
   // IF FROM QUERY HAVE UID, THEN RETURN ALL POST BY UID
   if (uid) {
@@ -32,11 +32,36 @@ const handler = async (req, res) => {
       .catch(() => {
         res.status(404).json({ message: 'posts not found' });
       });
+  } else if (lastId) {
+    let lastDoc;
+    await admin
+      .firestore()
+      .collection('posts')
+      .doc(lastId)
+      .get()
+      .then((doc) => {
+        lastDoc = doc.data().createAt;
+      });
+
+    admin
+      .firestore()
+      .collection('posts')
+      .orderBy('createAt', 'desc')
+      .limit(10)
+      .startAfter(lastDoc)
+      .get()
+      .then((querySnapshot) => {
+        handleQuerySnapshot(querySnapshot, res);
+      })
+      .catch(() => {
+        res.status(404).json({ message: 'posts not found' });
+      });
   } else {
     admin
       .firestore()
       .collection('posts')
       .orderBy('createAt', 'desc')
+      .limit(10)
       .get()
       .then((querySnapshot) => {
         handleQuerySnapshot(querySnapshot, res);

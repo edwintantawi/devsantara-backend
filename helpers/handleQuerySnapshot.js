@@ -23,11 +23,7 @@ const handleQuerySnapshot = (querySnapshot, res) => {
   });
 
   Promise.all(promises).then((results) => {
-    if (!results.length) {
-      res.status(404).json({ message: 'Not found' });
-    } else {
-      res.status(200).json({ message: 'Success', results });
-    }
+    res.status(200).json({ message: 'Success', results });
   });
 };
 
