@@ -31,6 +31,7 @@ const handler = async (req, res) => {
             ...data,
             authorName: authorRefData.displayName,
             authorPicture: authorRefData.photoURL,
+            authorUid: authorRef.id,
           };
 
           // remove author properties
